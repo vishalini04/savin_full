@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assistant</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: transparent;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
+
+    .assistant-container {
+      width: 300px;
+      background-color: rgba(30, 30, 40, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .assistant-container:hover {
+      background-color: rgba(40, 40, 60, 0.7);
+    }
+
+    .window-controls {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      display: flex;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+
+    .window-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .minimize {
+      background-color: #FFBD2E;
+    }
+
+    .close {
+      background-color: #FF5F57;
+    }
+
+    .avatar-container {
+      width: 120px;
+      height: 120px;
+      margin: 10px 0 20px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #4158D0 0%, #C850C0 50%, #FFCC70 100%);
+      animation: pulse 3s infinite alternate;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-color: white;
+      border-radius: 50%;
+      opacity: 0.2;
+      transform: translateY(-5px);
+    }
+
+    .avatar-ring {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      animation: spin 10s linear infinite;
+    }
+
+    .avatar-ring::before {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: -5px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.05); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .response-area {
+      width: 100%;
+      min-height: 60px;
+      margin: 10px 0;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .mic-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+      -webkit-app-region: no-drag;
+    }
+
+    .mic-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(110, 142, 251, 0.6);
+    }
+
+    .mic-button:active {
+      transform: scale(0.95);
+    }
+
+    .mic-icon {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
+    .listening .mic-button {
+      background: linear-gradient(135deg, #ff5858 0%, #f09819 100%);
+      animation: listening-pulse 1s infinite alternate;
+    }
+
+    @keyframes listening-pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    .status-indicator {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #4cd964;
+    }
+
+    .typing-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      margin-top: 5px;
+    }
+
+    .typing-indicator span {
+      width: 5px;
+      height: 5px;
+      margin: 0 2px;
+      background-color: white;
+      border-radius: 50%;
+      display: inline-block;
+      opacity: 0.7;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      animation: typing 1s infinite 0.2s;
+    }
+    .typing-indicator span:nth-child(2) {
+      animation: typing 1s infinite 0.4s;
+    }
+    .typing-indicator span:nth-child(3) {
+      animation: typing 1s infinite 0.6s;
+    }
+
+    @keyframes typing {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .typing .typing-indicator {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="window-controls">
+      <div class="window-control minimize" id="minimize-btn"></div>
+      <div class="window-control close" id="close-btn"></div>
+    </div>
+    
+    <div class="avatar-container">
+      <div class="avatar"></div>
+      <div class="avatar-ring"></div>
+    </div>
+    
+    <div class="response-area" id="response-text">
+      Hello! I'm your AI assistant. Click the microphone to speak.
+    </div>
+    
+    <div class="typing-indicator">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    
+    <div class="controls">
+      <div class="mic-button" id="mic-btn">
+        <svg class="mic-icon" viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="status-indicator"></div>
+  </div>
+
+  <script>
+    // Initialize variables for UI state
+    const assistantContainer = document.querySelector('.assistant-container');
+    const micButton = document.getElementById('mic-btn');
+    const responseText = document.getElementById('response-text');
+    const minimizeBtn = document.getElementById('minimize-btn');
+    const closeBtn = document.getElementById('close-btn');
+
+    let isListening = false;
+
+    // In Electron, we would interact with the main process using IPC
+    // For this frontend, we'll simulate the backend communication
+    
+    // Window control handlers
+    minimizeBtn.addEventListener('click', () => {
+      // In real Electron app, this would use:
+      // window.electron.minimizeWindow();
+      console.log('Minimize window');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      // In real Electron app, this would use:
+      // window.electron.closeWindow();
+      console.log('Close window');
+    });
+
+    // Microphone button handler
+    micButton.addEventListener('click', () => {
+      if (!isListening) {
+        startListening();
+      } else {
+        stopListening();
+      }
+    });
+
+    function startListening() {
+      isListening = true;
+      assistantContainer.classList.add('listening');
+      responseText.textContent = "I'm listening...";
+      
+      // In a real implementation, this would start speech recognition
+      // For demo purposes, we'll simulate receiving a command after a delay
+      setTimeout(() => {
+        // Simulate receiving a voice command
+        const mockCommand = "What's the weather like today?";
+        processVoiceCommand(mockCommand);
+      }, 3000);
+    }
+
+    function stopListening() {
+      isListening = false;
+      assistantContainer.classList.remove('listening');
+    }
+
+    function processVoiceCommand(command) {
+      // Show what was heard
+      responseText.textContent = `I heard: "${command}"`;
+      
+      // Simulate sending to backend and waiting for response
+      assistantContainer.classList.add('typing');
+      
+      // In a real Electron app, this would use IPC to communicate with the main process
+      // window.electron.sendVoiceCommand(command);
+      
+      // Simulate receiving a response after a delay
+      setTimeout(() => {
+        // Simulate response from backend
+        const response = "It's currently 72°F and sunny with a slight breeze. Perfect weather for a walk!";
+        
+        // Update UI with response
+        stopListening();
+        assistantContainer.classList.remove('typing');
+        responseText.textContent = response;
+      }, 2000);
+    }
+
+    // Make window draggable (in a real Electron app)
+    // This simulates the dragging functionality for the frontend demo
+    let isDragging = false;
+    let startX, startY;
+
+    assistantContainer.addEventListener('mousedown', (e) => {
+      // Ignore if clicking on controls
+      if (e.target.closest('.mic-button') || e.target.closest('.window-controls')) {
+        return;
+      }
+      
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      // For demo purposes only - in Electron this would use native window positioning
+      assistantContainer.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      // For demo purposes - simulate window movement
+      // In real Electron app, would send to main process to move window
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      
+      const containerRect = assistantContainer.getBoundingClientRect();
+      assistantContainer.style.position = 'absolute';
+      assistantContainer.style.left = `${containerRect.left + deltaX}px`;
+      assistantContainer.style.top = `${containerRect.top + deltaY}px`;
+      
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      assistantContainer.style.cursor = 'default';
+    });
+
+    // Initialize with a welcome animation
+    setTimeout(() => {
+      assistantContainer.style.opacity = '1';
+    }, 300);
+  </script>
+</body>
+</html>

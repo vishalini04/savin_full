@@ -1,0 +1,32 @@
+{
+    "name": "ai-desktop-assistant",
+    "version": "1.0.0",
+    "description": "A floating desktop AI assistant built with Electron",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder"
+    },
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^23.0.0",
+        "electron-builder": "^24.0.0"
+    },
+    "build": {
+        "appId": "com.example.ai-assistant",
+        "productName": "AI Assistant",
+        "mac": {
+            "category": "public.app-category.productivity"
+        },
+        "win": {
+            "target": "nsis"
+        },
+        "linux": {
+            "target": "AppImage"
+        }
+    },
+    "dependencies": {
+        "axios": "^1.8.3"
+    }
+}
