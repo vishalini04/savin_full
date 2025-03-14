@@ -1,0 +1,15 @@
+{
+    "intents": [
+      {
+        "tag": "time",
+        "patterns": ["What time is it?", "Tell me the time", "Current time please", "Can you say the time?", "What’s the time now?"],
+        "responses": ["The time is now {current_time}"]
+      },
+      {
+        "tag": "search_google",
+        "patterns": ["Search for", "Google this", "Find on Google", "Look up"],
+        "responses": ["Opening Google search..."]
+      }
+    ]
+  }
+  
